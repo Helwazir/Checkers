@@ -115,10 +115,13 @@ bool Checkers::validateMove(Player player, int rowStart, int colStart, int rowEn
 
     // If any of the indices of either the starting position or the ending position are less than 0
     if (rowStart < 0 || colStart < 0 || rowEnd < 0 || colEnd < 0) {
+        cout << "indices of either the starting position or the ending position are less than 0" << endl;
         return false;
     }
     // If the move is too far, check if too far for king too
     if(abs(rowStart - rowEnd) > 1 || abs(colStart - colEnd) > 1) {
+        cout << "the move is too far, check if too far for king too" << endl;
+
         if (movingPiece->isKing() && (abs(rowStart - rowEnd) > 2 || abs(colStart - colEnd) > 2)) {
             return false;
         }
@@ -136,22 +139,22 @@ bool Checkers::validateMove(Player player, int rowStart, int colStart, int rowEn
         return false;
     }
         // If the player is trying to move a piece that isn't theirs
-    else if (player != movingPiece->getPlayer()) {
-        cout << "player is trying to move a piece that isn't theirs" << endl;
-
-        return false;
-    }
+//    else if (player != movingPiece->getPlayer()) {
+//        cout << "player is trying to move a piece that isn't theirs" << endl;
+//
+//        return false;
+//    }
         // If the player is trying to move a onto a space already occupied by one of their pieces
-    else if (player == endPiece->getPlayer()) {
-        cout << "player is trying to move a onto a space already occupied by one of their pieces" << endl;
-        return false;
-    }
+//    else if (player == endPiece->getPlayer()) {
+//        cout << "player is trying to move a onto a space already occupied by one of their pieces" << endl;
+//        return false;
+//    }
         // If the player is trying to capture a piece but there is no spot to jump to
-    else if(player != endPiece->getPlayer() && diagonalEndPiece != nullopt) {
-        cout << "player is trying to capture a piece but there is no spot to jump to" << endl;
-
-        return false;
-    }
+//    else if(player != endPiece->getPlayer() && diagonalEndPiece != nullopt) {
+//        cout << "player is trying to capture a piece but there is no spot to jump to" << endl;
+//
+//        return false;
+//    }
     return true;
 }
 

@@ -23,6 +23,7 @@ using namespace std;
 
 enum Screen {Start, Second, End};
 Screen state = Start;
+Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
 Checkers checkers;
 GLdouble width, height, edgeLength;
@@ -32,7 +33,7 @@ Rect user;
 int wd;
 
 
-// TODO: Rewrite Piece class to have x and y fields to find position
+// TODO: Completely re-write move validation in Checkers.cpp
 
 void initUser() {
     // centered in the top left corner of the graphics window
@@ -173,12 +174,18 @@ void mouse(int button, int state, int x, int y) {
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         if (clicked == false) {
-            checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
-//            if (checkers.validateMove(PLAYER1, y_0, x_0, y_1, x_1)) {
-//                checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
-//            } else {
-//                cout << "INVALID MOVE" << endl;
-//            }
+//            checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
+            if (checkers.validateMove(player, y_0, x_0, y_1, x_1)) {
+                checkers.movePiece(player, y_0, x_0, y_1, x_1);
+
+                if (player == PLAYER1) {
+                    player = PLAYER2;
+                } else {
+                    player = PLAYER1;
+                }
+            } else {
+                cout << "INVALID MOVE" << endl;
+            }
             checkers.showBoard(cout);
         }
     }
