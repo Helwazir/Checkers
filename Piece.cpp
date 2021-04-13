@@ -8,13 +8,21 @@ using std::string;
 Piece::Piece() : player(nullopt), king(false) {
 }
 
-Piece::Piece(Player player) {
+Piece::Piece(Player player, int x, int y) {
     this->player = player;
     king = false;
 }
 
 optional<Player> Piece::getPlayer() const {
     return player;
+}
+
+int Piece::getXPos() const {
+    return xPos;
+}
+
+int Piece::getYPos() const {
+    return yPos;
 }
 
 void Piece::makeKing() {

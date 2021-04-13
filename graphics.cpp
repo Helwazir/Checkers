@@ -13,17 +13,35 @@
 #include <time.h>
 #include <memory>
 #include <vector>
+#include <optional>
+using std::optional;
+using std::nullopt;
+using std::make_optional;
+using std::istream;
 
 using namespace std;
 
 enum Screen {Start, Second, End};
 Screen state = Start;
+vector<vector<optional<Piece>>> board;
+Checkers checkers;
 GLdouble width, height, edgeLength;
+int x_0, y_0, x_1, y_1;
+bool clicked = false;
+Rect user;
 int wd;
 
 
+// TODO: Rewrite Piece class to have x and y fields to find position
+
+void initUser() {
+    // centered in the top left corner of the graphics window
+    user = Rect(color(1, 0, 0), 0, 0, dimensions(20, 20));
+}
 
 void init() {
+    checkers = Checkers();
+    checkers.createBoard();
     width = 600;
     height = 600;
     edgeLength = height / 8;
@@ -56,8 +74,10 @@ void display() {
      */
 
     // Draw Checkers Board
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
+    int i, j;
+    vector<Rect> spaces;
+    for (i = 0; i < 8; ++i) {
+        for (j = 0; j < 8; ++j) {
             Rect space = Rect(dimensions(edgeLength, edgeLength));
             space.setCenter((i * 75) + (75/2), (j * 75) + (75/2));
             if ((i + j) % 2 == 0) {
@@ -65,10 +85,38 @@ void display() {
             } else {
                 space.setColor(color(0, 0, 0));
             }
+            spaces.push_back(space);
             space.draw();
         }
     }
 
+    // Highlight space
+    for (Rect &space : spaces) {
+        if (space.isOverlapping(user)) {
+            space.setColor(color(0.5, 0.5, 0.5));
+            space.draw();
+        }
+    }
+
+    // Draw pieces
+    vector<Circle> pieces;
+    board = checkers.getBoard();
+    for (i = 0; i < 8; ++i) {
+        for (j = 0; j < 8; ++j) {
+            if (board[i][j] != nullopt) {
+                Circle piece = Circle(32);
+                piece.setCenter((j * 75) + (75/2), (i * 75) + (75/2));
+
+                if (board[i][j]->getPlayer() == PLAYER1) {;
+                    piece.setColor(color(0.75, 0, 0));
+                } else {
+                    piece.setColor(color(0.3, 0.19, 0.08));
+                }
+                pieces.push_back(piece);
+                piece.draw();
+            }
+        }
+    }
 
     glFlush();  // Render now
 }
@@ -99,13 +147,42 @@ void kbdS(int key, int x, int y) {
 }
 
 void cursor(int x, int y) {
-
+    user.setCenterX(x);
+    user.setCenterY(y);
     glutPostRedisplay();
 }
 
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
 void mouse(int button, int state, int x, int y) {
+
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        int spaceXPos = ceil(x / 75);
+        int spaceYPos = ceil(y / 75);
+        cout << spaceXPos << ", " << spaceYPos << endl;
+        if (clicked == false) {
+            x_0 = spaceXPos;
+            y_0 = spaceYPos;
+            clicked = true;
+        } else {
+            x_1 = spaceXPos;
+            y_1 = spaceYPos;
+            clicked = false;
+        }
+    }
+
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+        if (clicked == false) {
+            checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
+//            if (checkers.validateMove(PLAYER1, y_0, x_0, y_1, x_1)) {
+//                checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
+//            } else {
+//                cout << "INVALID MOVE" << endl;
+//            }
+            checkers.showBoard(cout);
+        }
+    }
+
 
     glutPostRedisplay();
 }

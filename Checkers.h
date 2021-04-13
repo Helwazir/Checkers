@@ -48,15 +48,8 @@ public:
      * Effects: Creates and populates a vector representing the board with pieces in the appropriate
      *          positions and with the appropriate owners.
      */
-    void createBoard(ostream &outs);
+    void createBoard();
 
-    /*
-     * Requires: ostream
-     * Modifies: board
-     * Effects: Creates a version of the two dimensional vector board set up specifically to make testing the
-     *          functions in Checkers easier.
-     */
-    void createTestingBoard(ostream &outs);
 
     /*
      * Requires: ostream
@@ -68,6 +61,10 @@ public:
 
 
     vector<vector<optional<Piece>>> getBoard() const;
+
+    vector<Piece> getPieces() const;
+
+
 
     /*
      * Requires: The current player, ostream, istream
@@ -86,7 +83,7 @@ public:
      *          valid and the method returns true. If the move meets any of the requirements for being
      *          invalid then the method returns false.
      */
-    bool validateMove(Player player, Move move) const;
+    bool validateMove(Player player, int rowStart, int colStart, int rowEnd, int colEnd) const;
 
     /*
      * Requires: The current player, and the move being performed
@@ -96,7 +93,7 @@ public:
      *          and captures it. The move is validated before this method is called so the move is
      *          always valid and executed.
      */
-    bool movePiece(Player player, Move move);
+    bool movePiece(Player player, int rowStart, int colStart, int rowEnd, int colEnd) ;
 
     /*
      * Requires: Nothing

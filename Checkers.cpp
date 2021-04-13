@@ -10,6 +10,8 @@ using std::endl;
 using std::vector;
 using std::move;
 
+vector<Piece> pieces;
+
 Checkers::Checkers() : BoardGame(2, 8, 8) {
 }
 
@@ -28,12 +30,11 @@ void Checkers::showRules(ostream &outs) {
     outs << "- To forfeit the game enter \"Q\" as both of your move." << endl << endl;
 }
 
-void Checkers::createBoard(ostream &outs) {
+void Checkers::createBoard() {
     int i, j;
     int rows = getBoardRows();
     int cols = getBoardCols();
 
-    showRules(outs); // Show the player the rules
 
     /* Creates an empty 8x8 board */
     vector<vector<optional<Piece>>> board;
@@ -43,38 +44,23 @@ void Checkers::createBoard(ostream &outs) {
     }
 
     /* Populate board with each player's pieces in the correct spots */
+
     for (i = 0; i < 8; ++i) {
         for (j = 0; j < 8; ++j) {
             if ((i + j) % 2 == 1 && i < 3) {
-                board[i][j] = Piece(PLAYER2); // Player 2
+                Piece piece = Piece(PLAYER2, i, j);
+                board[i][j] = piece; // Player 2
+                pieces.push_back(piece);
             } else if ((i + j) % 2 == 1 && i >= 5) {
-                board[i][j] = Piece(PLAYER1); // Player 1
+                Piece piece = Piece(PLAYER1, i, j);
+                board[i][j] = piece; // Player 2
+                pieces.push_back(piece);
             }
         }
     }
     this->board = board;
 }
 
-void Checkers::createTestingBoard(ostream &outs) {
-    int i;
-    int rows = getBoardRows();
-    int cols = getBoardCols();
-
-    /* Create empty board */
-    vector<vector<optional<Piece>>> board;
-    for (i = 0; i < rows; ++i) {
-        vector<optional<Piece>> col(cols);
-        board.push_back(col);
-    }
-
-    /* Piece locations for easy testing */
-    board[3][2] = Piece(PLAYER1);
-    board[4][3] = Piece(PLAYER1);
-    board[2][1] = Piece(PLAYER2);
-    board[6][2] = Piece(PLAYER2);
-
-    this->board = board;
-}
 
 void Checkers::showBoard(ostream &outs) const {
     int i, j;
@@ -93,6 +79,10 @@ vector<vector<optional<Piece>>> Checkers::getBoard() const {
     return board;
 }
 
+vector<Piece> Checkers::getPieces() const {
+    return pieces;
+}
+
 
 Move Checkers::getMove(Player player, ostream &outs, istream &ins) {
     Move move;
@@ -104,31 +94,18 @@ Move Checkers::getMove(Player player, ostream &outs, istream &ins) {
     if (tolower(move.startPos[0]) == 'q' || tolower(move.startPos[0]) == 'r') { // Return the move before validation if the player wants to quit or see the rules
         return move;
     }
-    while (!validateMove(player, move)) { // While the move is invalid prompt the player to enter a valid move
-        outs << "Invalid move, please enter a valid move" << endl;
-        cout << "Enter the location of the piece you want to move: ";
-        ins >> move.startPos;
-        cout << "Enter the location of the space you want to move to: ";
-        ins >> move.endPos;
-    }
+//    while (!validateMove(player, move)) { // While the move is invalid prompt the player to enter a valid move
+//        outs << "Invalid move, please enter a valid move" << endl;
+//        cout << "Enter the location of the piece you want to move: ";
+//        ins >> move.startPos;
+//        cout << "Enter the location of the space you want to move to: ";
+//        ins >> move.endPos;
+//    }
     return move;
 }
 
-bool Checkers::validateMove(Player player, Move move) const {
-    /* Perform string validation of the move before defining variables and performing numerical validation */
-    // If the entered strings aren't exactly 2 characters long
-    if (move.startPos.length() != 2 || move.endPos.length() != 2) {
-        return false;
-    }
-    // If the entered string isn't of the format "letter, number"
-    if (!isalpha(move.startPos[0]) || isalpha(move.startPos[1]) ||!isalpha(move.endPos[0]) || isalpha(move.endPos[1])) {
-        return false;
-    }
+bool Checkers::validateMove(Player player, int rowStart, int colStart, int rowEnd, int colEnd) const {
 
-    int rowStart = move.getRowStart();
-    int colStart = move.getColStart();
-    int rowEnd = move.getRowEnd();
-    int colEnd = move.getColEnd();
     int newRowEnd = (rowEnd * 2) - rowStart;
     int newColEnd = (colEnd * 2) - colStart;
 
@@ -149,32 +126,40 @@ bool Checkers::validateMove(Player player, Move move) const {
     }
         // If the player is trying to move backwards
     else if (player == PLAYER1 && rowStart - rowEnd < 1) {
+        cout << "player1 is trying to move backwards" << endl;
         return false;
     }
         // If the computer is trying to move backwards
     else if (player == PLAYER2 && rowStart - rowEnd > 1) {
+        cout << "player2 is trying to move backwards" << endl;
+
         return false;
     }
         // If the player is trying to move a piece that isn't theirs
     else if (player != movingPiece->getPlayer()) {
+        cout << "player is trying to move a piece that isn't theirs" << endl;
+
         return false;
     }
         // If the player is trying to move a onto a space already occupied by one of their pieces
     else if (player == endPiece->getPlayer()) {
+        cout << "player is trying to move a onto a space already occupied by one of their pieces" << endl;
         return false;
     }
         // If the player is trying to capture a piece but there is no spot to jump to
     else if(player != endPiece->getPlayer() && diagonalEndPiece != nullopt) {
+        cout << "player is trying to capture a piece but there is no spot to jump to" << endl;
+
         return false;
     }
     return true;
 }
 
-bool Checkers::movePiece(Player player, Move move) {
-    int rowStart = move.getRowStart();
-    int colStart = move.getColStart();
-    int rowEnd = move.getRowEnd();
-    int colEnd = move.getColEnd();
+bool Checkers::movePiece(Player player, int rowStart, int colStart, int rowEnd, int colEnd) {
+//    int rowStart = move.getRowStart();
+//    int colStart = move.getColStart();
+//    int rowEnd = move.getRowEnd();
+//    int colEnd = move.getColEnd();
 
     optional<Piece> movingPiece = board[rowStart][colStart];
     optional<Piece> endPiece = board[rowEnd][colEnd];
@@ -231,7 +216,7 @@ optional<bool> Checkers::checkWin() const {
 void Checkers::play(ostream &outs, istream &ins) {
     bool endGame = false;
     Player player = PLAYER1; // The current player
-    createBoard(outs);
+    createBoard();
 
     while (endGame == false) {
         showBoard(outs); // Show the board state after every turn
@@ -252,7 +237,7 @@ void Checkers::play(ostream &outs, istream &ins) {
             showRules(outs);
             move = getMove(player, outs, ins);
         }
-        movePiece(player, move); // Perform move
+//        movePiece(player, move); // Perform move
 
         // Change whose turn it is
         if (player == PLAYER1) {

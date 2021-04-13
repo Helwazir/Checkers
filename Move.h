@@ -13,8 +13,26 @@ using std::string;
  * value and fields for int coordinates of the starting position and ending position of the desired move.*/
 struct Move {
     // Player's move in terms of string coordinates(i.e. "a1", "b2")
+    int x0;
+    int y0;
+    int x1;
+    int y1;
     string startPos;
     string endPos;
+
+
+    int getX0() {
+        return x0;
+    }
+    int getY0() {
+        return y0;
+    }
+    int getX1() {
+        return x1;
+    }
+    int getY1() {
+        return y1;
+    }
 
     /*
      * Requires: Nothing

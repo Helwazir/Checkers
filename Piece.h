@@ -28,6 +28,8 @@ enum Player {PLAYER1, PLAYER2};
  */
 class Piece {
 private:
+    int xPos;
+    int yPos;
     optional<Player> player;
     bool king;
 
@@ -46,7 +48,7 @@ public:
      * Modifies: player
      * Effects: Sets the owner of the piece.
      */
-    explicit Piece(Player player);
+    explicit Piece(Player player, int x, int y);
 
     /*
      * Requires: Nothing
@@ -54,6 +56,10 @@ public:
      * Effects: Returns the owner of the piece. If the piece is nullopt then there is no piece.
      */
     optional<Player> getPlayer() const;
+
+    int getXPos() const;
+
+    int getYPos() const;
 
     /*
      * Requires: Nothing
