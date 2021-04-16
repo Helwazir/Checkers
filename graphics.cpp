@@ -2,16 +2,16 @@
 // Created by haz on 4/13/21.
 //
 
-#include "BoardGame.h"
 
-#include "Piece.h"
 #include "graphics.h"
 #include "shape.h"
 #include "rect.h"
 #include "circle.h"
-#include <iostream>
-#include <time.h>
+#include "CheckersPiece.h"
+#include "Piece.h"
 #include "Checkers.h"
+
+#include <time.h>
 #include <memory>
 #include <vector>
 #include <optional>
@@ -23,6 +23,7 @@ using std::istream;
 using namespace std;
 
 enum Screen {RULES, PLAY, END};
+bool validMove;
 Screen screenState;
 Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
@@ -36,10 +37,8 @@ Rect user;
 int wd;
 
 
-// TODO: Change appearance of pieces when they are kings
+// TODO: Comment everything
 // TODO: Flip the board to display the current player's view
-// TODO: Re-write rules
-// TODO: Make piece size change with board size?
 
 void initUser() {
     // centered in the top left corner of the graphics window
@@ -48,6 +47,7 @@ void initUser() {
 
 void init() {
     screenState = RULES;
+    validMove = true;
     checkers = Checkers();
     checkers.createBoard();
     width = 600;
@@ -82,13 +82,10 @@ void display() {
      */
 
     if (screenState == RULES) {
-
-
         vector<string> rules = checkers.getRules();
         for (int i = 0; i < rules.size(); ++i) {
 
             glColor3f(1, 1, 1);
-//            glRasterPos2i((height / 2) - (4 * rules[i].length()), (width / 4) + (20 * i));
             glRasterPos2i((height / 12), (width / 4) + (20 * i));
 
             for (const char &letter : rules[i]) {
@@ -99,8 +96,6 @@ void display() {
 
 
     if (screenState == PLAY) {
-
-
         // Draw Checkers Board
         int i, j;
         vector<Rect> spaces;
@@ -132,7 +127,7 @@ void display() {
         for (i = 0; i < 8; ++i) {
             for (j = 0; j < 8; ++j) {
                 if (board[i][j] != nullopt) {
-                    Circle piece = Circle(32);
+                    CheckersPiece piece = CheckersPiece(board[i][j]->isKing());
                     piece.setCenter((j * 75) + (75 / 2), (i * 75) + (75 / 2));
 
                     if (board[i][j]->getPlayer() == PLAYER1) { ;
@@ -144,6 +139,33 @@ void display() {
                     piece.draw();
                 }
             }
+        }
+
+        if (validMove == false) {
+//            glColor3f(0.2, 0.2, 0.2);
+            Rect messageBox = Rect(dimensions(400, 38));
+            messageBox.setColor(color(0.2, 0.2, 0.2));
+            messageBox.setCenter(height/2, width / 2 - 4);
+            messageBox.draw();
+
+            string results = "Invalid move, please make a different move";
+            glColor3f(1, 1, 1);
+            glRasterPos2i((height / 2) - (4 * results.length()), width / 2);
+
+            for (const char &letter : results) {
+                glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
+            }
+        }
+
+    }
+
+    if (screenState == END) {
+        string results = checkers.getResults();
+        glColor3f(1, 1, 1);
+        glRasterPos2i((height / 2) - (4 * results.length()), width / 2);
+
+        for (const char &letter : results) {
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
         }
     }
 
@@ -204,12 +226,14 @@ void mouse(int button, int state, int x, int y) {
     }
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && !secondClick && screenState == PLAY) {
-        cout << "Starting position: " << "(" << cMove.x0 << ", " << cMove.y0 << ")" << endl;
-        cout << "Ending position: " << "(" << cMove.x1 << ", " << cMove.y1 << ")" << endl;
         if (!checkers.validateMove(player, cMove)) {
-            cout << "Invalid move, please make a different move" << endl;
+            validMove = false;
         } else {
+            validMove = true;
             checkers.movePiece(cMove);
+            if (checkers.checkWin()) {
+                screenState = END;
+            }
             if (player == PLAYER1) {
                 player = PLAYER2;
             } else {

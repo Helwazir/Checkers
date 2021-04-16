@@ -6,39 +6,35 @@
 #include "graphics.h"
 
 CheckersPiece::CheckersPiece() : Circle(32) {
+    this->king = false;
 }
-CheckersPiece::CheckersPiece(int x, int y) : Circle(x, y, 32) {
-}
-CheckersPiece::CheckersPiece(int x, int y, bool king) : Circle(x, y, 32) {
+
+CheckersPiece::CheckersPiece(bool king) : Circle(32) {
     this->king = king;
 }
 
-
-bool CheckersPiece::isKing() const {
-    return king;
-}
-void CheckersPiece::makeKing() {
-    king = true;
-}
-
 void CheckersPiece::draw() const {
-    // Set drawing color to fill color
-    glColor3f(fill.red, fill.green, fill.blue);
-    // Draw circle as Triangle Fan
-    glBegin(GL_TRIANGLE_FAN);
-    // Draw center point
-    glVertex2i(center.x, center.y);
-    // Draw points on edge of circle
-    for (double i = 0; i < 2.0*PI+0.05; i += (2.0*PI)/360.0) {
-        glVertex2i(center.x + (getRadius() * cos(i)),
-                   center.y + (getRadius() * sin(i)));
+    int radius = getRadius();
+    Circle::draw();
+
+    if (king) {
+        glColor3f(0, 0, 0);
+        glBegin(GL_TRIANGLES);
+        glVertex2i(center.x - (radius / 2), center.y - (radius / 2));
+        glVertex2i(center.x - (radius / 2), center.y);
+        glVertex2i(center.x, center.y);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex2i(center.x + (getRadius() / 2), center.y - (getRadius() / 2));
+        glVertex2i(center.x + (getRadius() / 2), center.y);
+        glVertex2i(center.x, center.y);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glVertex2i(center.x, center.y - (getRadius() / 2));
+        glVertex2i(center.x - (getRadius() / 2), center.y);
+        glVertex2i(center.x + (getRadius() / 2), center.y);
+        glEnd();
     }
-    // End Triangle Fan
-
-    glColor3f(0, 0, 0);
-
-
-
-    glEnd();
 }
-

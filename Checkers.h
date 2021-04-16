@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 #include <iterator>
-#include "BoardGame.h"
+
 #include "G_Move.h"
 #include "Piece.h"
 using std::optional;
@@ -20,8 +20,8 @@ using std::string;
 
 class Checkers {
 private:
-    int playerOneCaptured = 0;
-    int playerTwoCaptured = 0;
+    int p1PieceCount = 12;
+    int p2PieceCount = 12;
     vector<vector<optional<Piece>>> board;
 
 public:
@@ -33,11 +33,13 @@ public:
 
     vector<vector<optional<Piece>>> getBoard() const;
 
-    bool isPiece(int x, int y) const;
-
     bool validateMove(Player player, G_Move move) const;
 
     void movePiece(G_Move move);
+
+    bool checkWin() const;
+
+    string getResults() const;
 
 };
 

@@ -5,12 +5,6 @@
 #ifndef M4OEP_GRAPHIC_PIECE_H
 #define M4OEP_GRAPHIC_PIECE_H
 
-//#include <experimental/optional>
-//using std::experimental::optional;
-//using std::experimental::nullopt;
-//using std::experimental::make_optional;
-//using std::istream;
-
 #include <optional>
 using std::optional;
 using std::nullopt;
@@ -57,9 +51,12 @@ public:
      */
     optional<Player> getPlayer() const;
 
-    int getXPos() const;
-
-    int getYPos() const;
+    /*
+     * Requires: The x and y coordinates of the piece
+     * Modifies: xPos, yPos
+     * Effects: Sets xPos and yPos to the current position of the piece.
+     */
+    void setPos(int x, int y);
 
     /*
      * Requires: Nothing
@@ -76,15 +73,13 @@ public:
     bool isKing() const;
 
     /*
-     * Requires: The owner of the piece and the row it is on
+     * Requires: Nothing
      * Modifies: king
      * Effects: Checks whether or not a player's piece is in the correct spot to become a king. If it is then the
      *          piece is made a king.
      */
-    void checkMakeKing(Player player, int row);
+    void checkMakeKing();
 
-    /* Overloaded << operator to print pieces differently depending on the owner */
-    friend ostream& operator << (ostream& outs, const optional<Piece> &piece);
 };
 
 

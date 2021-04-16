@@ -13,10 +13,8 @@ private:
 
 public:
     CheckersPiece();
-    CheckersPiece(int x, int y);
-    CheckersPiece(int x, int y, bool king);
-    bool isKing() const;
-    void makeKing();
+
+    explicit CheckersPiece(bool king);
 
     void draw() const;
 };
