@@ -3,7 +3,7 @@
 //
 
 #include "BoardGame.h"
-#include "Checkers.h"
+
 #include "Piece.h"
 #include "graphics.h"
 #include "shape.h"
@@ -11,7 +11,7 @@
 #include "circle.h"
 #include <iostream>
 #include <time.h>
-#include "G_Checkers.h"
+#include "Checkers.h"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -27,7 +27,7 @@ Screen screenState;
 Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
 //Checkers checkers;
-G_Checkers checkers;
+Checkers checkers;
 GLdouble width, height, edgeLength;
 int x_0, y_0, x_1, y_1;
 G_Move cMove;
@@ -39,6 +39,7 @@ int wd;
 // TODO: Change appearance of pieces when they are kings
 // TODO: Flip the board to display the current player's view
 // TODO: Re-write rules
+// TODO: Make piece size change with board size?
 
 void initUser() {
     // centered in the top left corner of the graphics window
@@ -47,7 +48,7 @@ void initUser() {
 
 void init() {
     screenState = RULES;
-    checkers = G_Checkers();
+    checkers = Checkers();
     checkers.createBoard();
     width = 600;
     height = 600;
@@ -87,7 +88,9 @@ void display() {
         for (int i = 0; i < rules.size(); ++i) {
 
             glColor3f(1, 1, 1);
-            glRasterPos2i((height / 2) - (4 * rules[i].length()), (width / 4) + (20 * i));
+//            glRasterPos2i((height / 2) - (4 * rules[i].length()), (width / 4) + (20 * i));
+            glRasterPos2i((height / 12), (width / 4) + (20 * i));
+
             for (const char &letter : rules[i]) {
                 glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
             }
@@ -185,7 +188,7 @@ void cursor(int x, int y) {
 // state will be GLUT_UP or GLUT_DOWN
 void mouse(int button, int state, int x, int y) {
     board = checkers.getBoard();
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && screenState == PLAY) {
         int spaceXPos = ceil(y / 75); // Maybe change back to ceil?
         int spaceYPos = ceil(x / 75);
 
@@ -200,7 +203,7 @@ void mouse(int button, int state, int x, int y) {
         }
     }
 
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && !secondClick) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && !secondClick && screenState == PLAY) {
         cout << "Starting position: " << "(" << cMove.x0 << ", " << cMove.y0 << ")" << endl;
         cout << "Ending position: " << "(" << cMove.x1 << ", " << cMove.y1 << ")" << endl;
         if (!checkers.validateMove(player, cMove)) {

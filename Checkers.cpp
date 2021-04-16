@@ -1,6 +1,7 @@
 //
-// Created by haz on 4/13/21.
+// Created by haz on 4/16/21.
 //
+
 
 #include <algorithm>
 #include <iostream>
@@ -9,32 +10,15 @@ using std::cout;
 using std::endl;
 using std::vector;
 using std::move;
+using std::pair;
 
-vector<Piece> pieces;
-
-Checkers::Checkers() : BoardGame(2, 8, 8) {
-}
-
-void Checkers::showRules(ostream &outs) {
-    outs << "Checkers Rules:" << endl;
-    outs << "- Player 1's pieces are marked as (p), Player 2's pieces are marked as (c)." << endl;
-    outs << "- To make a move enter the coordinates of piece you want to move i.e. \"a1\"." << endl;
-    outs << "  and the coordinates of the space you want to move to i.e. \"b2\"." << endl;
-    outs << "- If you want to jump over an enemy piece and capture it enter the coordinates of the enemy piece, not the space you jump to." << endl;
-    outs << "- This version of checkers does not support making multiple jumps in one turn :( ." << endl;
-    outs << "- If one of your pieces reaches the opposite side of the board it becomes a king." << endl;
-    outs << "- King pieces are distinguished by an uppercase letter marking the piece: (P) or (C)." << endl;
-    outs << "- King pieces can move both forwards and backwards." << endl;
-    outs << "- A player wins when they have either captured all of the opponent's pieces." << endl;
-    outs << "- To see the rules again enter \"R\" as both of your moves." << endl;
-    outs << "- To forfeit the game enter \"Q\" as both of your move." << endl << endl;
+Checkers::Checkers() {
 }
 
 void Checkers::createBoard() {
     int i, j;
-    int rows = getBoardRows();
-    int cols = getBoardCols();
-
+    int rows = 8;
+    int cols = 8;
 
     /* Creates an empty 8x8 board */
     vector<vector<optional<Piece>>> board;
@@ -44,222 +28,131 @@ void Checkers::createBoard() {
     }
 
     /* Populate board with each player's pieces in the correct spots */
-
-    for (i = 0; i < 8; ++i) {
-        for (j = 0; j < 8; ++j) {
+    for (i = 0; i < rows; ++i) {
+        for (j = 0; j < cols; ++j) {
             if ((i + j) % 2 == 1 && i < 3) {
                 Piece piece = Piece(PLAYER2, i, j);
-                board[i][j] = piece; // Player 2
-                pieces.push_back(piece);
-            } else if ((i + j) % 2 == 1 && i >= 5) {
+                board[i][j] = piece; // Player2
+            }
+            else if ((i + j) % 2 == 1 && i >= 5) {
                 Piece piece = Piece(PLAYER1, i, j);
-                board[i][j] = piece; // Player 2
-                pieces.push_back(piece);
+                board[i][j] = piece; // Player11
             }
         }
     }
     this->board = board;
 }
 
-
-void Checkers::showBoard(ostream &outs) const {
-    int i, j;
-    for (i = 0; i < 8; ++i) {
-        outs << 8 - i << "| ";
-        for (j = 0; j < 8; ++j) {
-            outs << board[i][j];
-        }
-        outs << endl;
-    }
-    outs << " -------------------------" << endl;
-    outs << "    A  B  C  D  E  F  G  H" << endl;
+vector<string> Checkers::getRules() const {
+    vector<string> rules {"Checkers Rules:",
+                          "- Player 1's pieces are red, Player 2's pieces are brown.",
+                          "- To make a move enter the coordinates of piece you want to move",
+                          " and the coordinates of the space you want to move to",
+                          "- If you want to jump over an enemy piece and capture it",
+                          " enter the coordinates of the enemy piece",
+                          "- This version of checkers does not support making multiple", "jumps in one turn :( .",
+                          "- If one of your pieces reaches the opposite side of the board", "it becomes a king.",
+                          "- King pieces are distinguished by an uppercase letter marking", "the piece: (P) or (C).",
+                          "- King pieces can move both forwards and backwards.",
+                          "- A player wins when they have either captured all of the", "opponent's pieces.",
+                          "Press 's' to start playing"};
+//    string rules = "Checkers Rules:\n"
+//                   "- Player 1's pieces are marked as (p), Player 2's pieces are marked as (c).\n"
+//                   "- To make a move enter the coordinates of piece you want to move i.e. \"a1\".\n"
+//                   "  and the coordinates of the space you want to move to i.e. \"b2\".\n"
+//                   "- If you want to jump over an enemy piece and capture it enter the coordinates of the enemy piece, not the space you jump to.\n"
+//                   "- This version of checkers does not support making multiple jumps in one turn :( .\n"
+//                   "- If one of your pieces reaches the opposite side of the board it becomes a king.\n"
+//                   "- King pieces are distinguished by an uppercase letter marking the piece: (P) or (C).\n"
+//                   "- King pieces can move both forwards and backwards.\n"
+//                   "- A player wins when they have either captured all of the opponent's pieces.\n"
+//                   "- To see the rules again enter \"R\" as both of your moves.\n"
+//                   "- To forfeit the game enter \"Q\" as both of your move.\n"
+//                   "Press 's' to start playing";
+    return rules;
 }
 
 vector<vector<optional<Piece>>> Checkers::getBoard() const {
     return board;
 }
 
-vector<Piece> Checkers::getPieces() const {
-    return pieces;
-}
-
-
-Move Checkers::getMove(Player player, ostream &outs, istream &ins) {
-    Move move;
-    cout << "Enter the location of the piece you want to move: ";
-    ins >> move.startPos;
-    cout << "Enter the location of the space you want to move to: ";
-    ins >> move.endPos;
-
-    if (tolower(move.startPos[0]) == 'q' || tolower(move.startPos[0]) == 'r') { // Return the move before validation if the player wants to quit or see the rules
-        return move;
+bool Checkers::isPiece(int x, int y) const {
+    if (board[x][y]) {
+        return true;
     }
-//    while (!validateMove(player, move)) { // While the move is invalid prompt the player to enter a valid move
-//        outs << "Invalid move, please enter a valid move" << endl;
-//        cout << "Enter the location of the piece you want to move: ";
-//        ins >> move.startPos;
-//        cout << "Enter the location of the space you want to move to: ";
-//        ins >> move.endPos;
-//    }
-    return move;
+    return false;
 }
 
-bool Checkers::validateMove(Player player, int rowStart, int colStart, int rowEnd, int colEnd) const {
-    cout << "Start coordinates: (" << rowStart << ", " << colStart << ")" << endl;
-    cout << "End coordinates: (" << rowEnd << ", " << colEnd << ")" << endl;
+bool Checkers::validateMove(Player player, G_Move move) const {
+    int xJ, yJ;
+    int x0 = move.x0;
+    int y0 = move.y0;
+    int x1 = move.x1;
+    int y1 = move.y1;
 
-    int newRowEnd = (rowEnd * 2) - rowStart;
-    int newColEnd = (colEnd * 2) - colStart;
-
-    optional<Piece> movingPiece = board[rowStart][colStart]; // Piece being moved
-    optional<Piece> endPiece = board[rowEnd][colEnd]; // Spot the piece is trying to be moved to
-    optional<Piece> diagonalEndPiece = board[newRowEnd][newColEnd]; // The spot diagonal from the spot being moved to (jumping spot)
-
-    // If any of the indices of either the starting position or the ending position are less than 0
-    if (rowStart < 0 || colStart < 0 || rowEnd < 0 || colEnd < 0) {
-        cout << "indices of either the starting position or the ending position are less than 0" << endl;
+    // User clicked an empty space or an opposing player's piece
+    if (!board[x0][y0] || board[x0][y0]->getPlayer() != player) {
+        cout << "User clicked an empty space or an opposing player's piece" << endl;
         return false;
     }
-    // If the move is too far, check if too far for king too
-    if(abs(rowStart - rowEnd) > 1 || abs(colStart - colEnd) > 1) {
-        cout << "the move is too far, check if too far for king too" << endl;
 
-        if (movingPiece->isKing() && (abs(rowStart - rowEnd) > 2 || abs(colStart - colEnd) > 2)) {
+    // If the move is too large, i.e. greater than two spaces
+    if (abs(x0 - x1) > 2 || abs(y0 - y1) > 2) {
+        cout << "If the move is too large, i.e. greater than two spaces" << endl;
+        return false;
+    }
+
+    // There is already a piece on the ending space
+    if (board[x1][y1]) {
+        cout << "There is already a piece on the ending space" << endl;
+
+        return false;
+    }
+
+    // If either player is trying to move backwards without a king
+    if ((player == PLAYER1 && x1 >= x0) || (player == PLAYER2 && x1 <= x0)) {
+        if (!board[x0][y0]->isKing()) {
+            cout << "If either player is trying to move backwards without a king" << endl;
             return false;
         }
-        return false;
     }
-        // If the player is trying to move backwards
-    else if (player == PLAYER1 && rowStart - rowEnd < 1) {
-        cout << "player1 is trying to move backwards" << endl;
-        return false;
-    }
-        // If the computer is trying to move backwards
-    else if (player == PLAYER2 && rowStart - rowEnd > 1) {
-        cout << "player2 is trying to move backwards" << endl;
 
-        return false;
+    // The move involves jumping over a piece
+    if (abs(x0 - x1) == 2 && abs(y0 - y1) == 2) {
+        cout << "The move involves jumping over a piece" << endl;
+
+        // Coordinates of piece being jumped over
+        (x0 > x1) ? xJ = x0 - 1 : xJ = x0 + 1;  // if x0 > x1 then xJ = x0 - 1 otherwise xJ = x0 + 1
+        (y0 > y1) ? yJ = y0 - 1 : yJ = y0 + 1;  // if y0 > y1 then yJ = y0 - 1 otherwise yJ = y0 + 1
+
+        // There is no piece to jump over or the player is trying to jump over their own piece
+        if (!board[xJ][yJ] || board[xJ][yJ]->getPlayer() == player) {
+            cout << "" << endl;
+
+            return false;
+        }
     }
-        // If the player is trying to move a piece that isn't theirs
-//    else if (player != movingPiece->getPlayer()) {
-//        cout << "player is trying to move a piece that isn't theirs" << endl;
-//
-//        return false;
-//    }
-        // If the player is trying to move a onto a space already occupied by one of their pieces
-//    else if (player == endPiece->getPlayer()) {
-//        cout << "player is trying to move a onto a space already occupied by one of their pieces" << endl;
-//        return false;
-//    }
-        // If the player is trying to capture a piece but there is no spot to jump to
-//    else if(player != endPiece->getPlayer() && diagonalEndPiece != nullopt) {
-//        cout << "player is trying to capture a piece but there is no spot to jump to" << endl;
-//
-//        return false;
-//    }
+
+    cout << "Move is valid" << endl;
     return true;
 }
 
-bool Checkers::movePiece(Player player, int rowStart, int colStart, int rowEnd, int colEnd) {
-//    int rowStart = move.getRowStart();
-//    int colStart = move.getColStart();
-//    int rowEnd = move.getRowEnd();
-//    int colEnd = move.getColEnd();
+void Checkers::movePiece(G_Move move) {
+    int xJ, yJ;
+    int x0 = move.x0;
+    int y0 = move.y0;
+    int x1 = move.x1;
+    int y1 = move.y1;
 
-    optional<Piece> movingPiece = board[rowStart][colStart];
-    optional<Piece> endPiece = board[rowEnd][colEnd];
+    optional<Piece> movingPiece = board[x0][y0];
 
-    if (endPiece) {
-        /* Update ending space indices */
-        int newRowEnd = (rowEnd * 2) - rowStart;
-        int newColEnd = (colEnd * 2) - colStart;
-        optional<Piece> diagonalEndPiece = board[newRowEnd][newColEnd];
+    board[x0][y0] = nullopt;  // "Pick up" moving piece
+    board[x1][y1] = movingPiece;  // "Place" the moving piece on its new space
 
-        /* If the ending space has an opponents piece and the diagonal space is empty */
-        if (endPiece->getPlayer() != player && !diagonalEndPiece) {
-            board[rowStart][colStart] = nullopt;    // Take piece from original spot
-            board[rowEnd][colEnd] = nullopt;    // Capture piece and remove from board
-            board[newRowEnd][newColEnd] = movingPiece;    // Place original piece on the new space
-
-            updatePieces(player); // Update the pieces captured of the current player
-            board[newRowEnd][newColEnd]->checkMakeKing(player, newRowEnd); // Check if the moved piece is eligible to become a king
-        }
-    } else { // The ending spot is empty
-        board[rowStart][colStart] = nullopt;    // Take piece from original spot..
-        board[rowEnd][colEnd] = movingPiece;  // And place it on the new space
-        board[rowEnd][colEnd]->checkMakeKing(player, rowEnd); // Check if the moved piece is eligible to become a king
+    // The move involves jumping over a piece
+    if (abs(x0 - x1) == 2 && abs(y0 - y1) == 2) {
+        (x0 > x1) ? xJ = x0 - 1 : xJ = x0 + 1;  // if x0 > x1 then xJ = x0 - 1 otherwise xJ = x0 + 1
+        (y0 > y1) ? yJ = y0 - 1 : yJ = y0 + 1;  // if y0 > y1 then yJ = y0 - 1 otherwise yJ = y0 + 1
+        board[xJ][yJ] = nullopt;  // Remove the captured piece
     }
-    return true;
-}
-
-int Checkers::getPlayerOneCaptured() const {
-    return playerOneCaptured;
-}
-
-int Checkers::getPlayerTwoCaptured() const {
-    return playerTwoCaptured;
-}
-
-void Checkers::updatePieces(Player player) {
-    if (player == PLAYER1) {
-        ++playerOneCaptured;
-    } else {
-        ++playerTwoCaptured;
-    }
-}
-
-optional<bool> Checkers::checkWin() const {
-    if(getPlayerOneCaptured() == 12) { // Player one has captured all 12 of player two's pieces
-        return true;
-    } else if (getPlayerTwoCaptured() == 12) { // Player two has captured all of player one's pieces
-        return false;
-    } else { // Neither player has captured all of the other player's pieces
-        return nullopt;
-    }
-}
-
-void Checkers::play(ostream &outs, istream &ins) {
-    bool endGame = false;
-    Player player = PLAYER1; // The current player
-    createBoard();
-
-    while (endGame == false) {
-        showBoard(outs); // Show the board state after every turn
-        Move move;
-
-        // Inform whose turn it is
-        if (player == PLAYER1) {
-            outs << "Player 1's Turn!" << endl;
-        } else {
-            outs << "Player 2's Turn!" << endl;
-        }
-
-        move = getMove(player, outs, ins); // Get move from the current player
-        if (tolower(move.startPos[0]) == 'q') { // Check if player wants to quit
-            outs << "You forfeited" << endl;
-            break;
-        } else if (tolower(move.startPos[0]) == 'r') { // Check if player wants to see the rules
-            showRules(outs);
-            move = getMove(player, outs, ins);
-        }
-//        movePiece(player, move); // Perform move
-
-        // Change whose turn it is
-        if (player == PLAYER1) {
-            player = PLAYER2;
-        } else {
-            player = PLAYER1;
-        }
-
-        if (checkWin() != nullopt) { // Check if either player has won
-            endGame = true; // End the game
-        }
-    }
-    // Print who won
-    if (checkWin()) {
-        outs << "Player 1 Wins!" << endl;
-    } else {
-        outs << "Player 2 Wins!" << endl;
-    }
-    outs << "Thanks for playing!";
 }
