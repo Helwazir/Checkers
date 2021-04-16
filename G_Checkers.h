@@ -29,6 +29,8 @@ public:
 
     void createBoard();
 
+    vector<string> getRules() const;
+
     vector<vector<optional<Piece>>> getBoard() const;
 
     bool isPiece(int x, int y) const;

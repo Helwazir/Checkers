@@ -22,20 +22,23 @@ using std::istream;
 
 using namespace std;
 
-enum Screen {Start, Second, End};
-Screen state = Start;
+enum Screen {RULES, PLAY, END};
+Screen screenState;
 Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
-Checkers checkers;
-G_Checkers G_check;
+//Checkers checkers;
+G_Checkers checkers;
 GLdouble width, height, edgeLength;
 int x_0, y_0, x_1, y_1;
-bool clicked = false;
+G_Move cMove;
+bool secondClick = false;
 Rect user;
 int wd;
 
 
-// TODO: Completely re-write move validation in Checkers.cpp
+// TODO: Change appearance of pieces when they are kings
+// TODO: Flip the board to display the current player's view
+// TODO: Re-write rules
 
 void initUser() {
     // centered in the top left corner of the graphics window
@@ -43,7 +46,8 @@ void initUser() {
 }
 
 void init() {
-    checkers = Checkers();
+    screenState = RULES;
+    checkers = G_Checkers();
     checkers.createBoard();
     width = 600;
     height = 600;
@@ -76,47 +80,66 @@ void display() {
      * Draw Here
      */
 
-    // Draw Checkers Board
-    int i, j;
-    vector<Rect> spaces;
-    for (i = 0; i < 8; ++i) {
-        for (j = 0; j < 8; ++j) {
-            Rect space = Rect(dimensions(edgeLength, edgeLength));
-            space.setCenter((i * 75) + (75/2), (j * 75) + (75/2));
-            if ((i + j) % 2 == 0) {
-                space.setColor(color(1, 1, 1));
-            } else {
-                space.setColor(color(0, 0, 0));
+    if (screenState == RULES) {
+
+
+        vector<string> rules = checkers.getRules();
+        for (int i = 0; i < rules.size(); ++i) {
+
+            glColor3f(1, 1, 1);
+            glRasterPos2i((height / 2) - (4 * rules[i].length()), (width / 4) + (20 * i));
+            for (const char &letter : rules[i]) {
+                glutBitmapCharacter(GLUT_BITMAP_8_BY_13, letter);
             }
-            spaces.push_back(space);
-            space.draw();
         }
     }
 
-    // Highlight space
-    for (Rect &space : spaces) {
-        if (space.isOverlapping(user)) {
-            space.setColor(color(0.5, 0.5, 0.5));
-            space.draw();
-        }
-    }
 
-    // Draw pieces
-    vector<Circle> pieces;
-    board = checkers.getBoard();
-    for (i = 0; i < 8; ++i) {
-        for (j = 0; j < 8; ++j) {
-            if (board[i][j] != nullopt) {
-                Circle piece = Circle(32);
-                piece.setCenter((j * 75) + (75/2), (i * 75) + (75/2));
+    if (screenState == PLAY) {
 
-                if (board[i][j]->getPlayer() == PLAYER1) {;
-                    piece.setColor(color(0.75, 0, 0));
+
+        // Draw Checkers Board
+        int i, j;
+        vector<Rect> spaces;
+        for (i = 0; i < 8; ++i) {
+            for (j = 0; j < 8; ++j) {
+                Rect space = Rect(dimensions(edgeLength, edgeLength));
+                space.setCenter((i * 75) + (75 / 2), (j * 75) + (75 / 2));
+                if ((i + j) % 2 == 0) {
+                    space.setColor(color(1, 1, 1));
                 } else {
-                    piece.setColor(color(0.3, 0.19, 0.08));
+                    space.setColor(color(0, 0, 0));
                 }
-                pieces.push_back(piece);
-                piece.draw();
+                spaces.push_back(space);
+                space.draw();
+            }
+        }
+
+        // Highlight space
+        for (Rect &space : spaces) {
+            if (space.isOverlapping(user)) {
+                space.setColor(color(0.5, 0.5, 0.5));
+                space.draw();
+            }
+        }
+
+        // Draw pieces
+        vector<Circle> pieces;
+        board = checkers.getBoard();
+        for (i = 0; i < 8; ++i) {
+            for (j = 0; j < 8; ++j) {
+                if (board[i][j] != nullopt) {
+                    Circle piece = Circle(32);
+                    piece.setCenter((j * 75) + (75 / 2), (i * 75) + (75 / 2));
+
+                    if (board[i][j]->getPlayer() == PLAYER1) { ;
+                        piece.setColor(color(0.75, 0, 0));
+                    } else {
+                        piece.setColor(color(0.3, 0.19, 0.08));
+                    }
+                    pieces.push_back(piece);
+                    piece.draw();
+                }
             }
         }
     }
@@ -130,6 +153,9 @@ void kbd(unsigned char key, int x, int y) {
     if (key == 27) {
         glutDestroyWindow(wd);
         exit(0);
+    }
+    if (key == 's' && screenState == RULES) {
+        screenState = PLAY;
     }
 
     glutPostRedisplay();
@@ -160,47 +186,39 @@ void cursor(int x, int y) {
 void mouse(int button, int state, int x, int y) {
     board = checkers.getBoard();
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        int spaceXPos = ceil(x / 75);
-        int spaceYPos = ceil(y / 75);
-        cout << spaceXPos << ", " << spaceYPos << endl;
-        if (clicked == false) {
-            x_0 = spaceXPos;
-            y_0 = spaceYPos;
-            clicked = true;
+        int spaceXPos = ceil(y / 75); // Maybe change back to ceil?
+        int spaceYPos = ceil(x / 75);
+
+        if (secondClick == false) {
+            cMove.x0 = spaceXPos;
+            cMove.y0 = spaceYPos;
+            secondClick = true;
         } else {
-            x_1 = spaceXPos;
-            y_1 = spaceYPos;
-            clicked = false;
+            cMove.x1 = spaceXPos;
+            cMove.y1 = spaceYPos;
+            secondClick = false;
         }
     }
 
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        if (clicked == false) {
-//            checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
-            while (!checkers.validateMove(player, y_0, x_0, y_1, x_1)) {
-                cout << "Invalid move, please make a different move" << endl;
-            }
-            if (checkers.validateMove(player, y_0, x_0, y_1, x_1)) {
-                checkers.movePiece(player, y_0, x_0, y_1, x_1);
-
-                if (player == PLAYER1) {
-                    player = PLAYER2;
-                } else {
-                    player = PLAYER1;
-                }
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && !secondClick) {
+        cout << "Starting position: " << "(" << cMove.x0 << ", " << cMove.y0 << ")" << endl;
+        cout << "Ending position: " << "(" << cMove.x1 << ", " << cMove.y1 << ")" << endl;
+        if (!checkers.validateMove(player, cMove)) {
+            cout << "Invalid move, please make a different move" << endl;
+        } else {
+            checkers.movePiece(cMove);
+            if (player == PLAYER1) {
+                player = PLAYER2;
             } else {
-                cout << "INVALID MOVE" << endl;
+                player = PLAYER1;
             }
-            checkers.showBoard(cout);
         }
     }
-
 
     glutPostRedisplay();
 }
 
 void timer(int dummy) {
-
     glutPostRedisplay();
     glutTimerFunc(30, timer, dummy);
 }
@@ -217,7 +235,7 @@ int main(int argc, char** argv) {
     glutInitWindowSize((int)width, (int)height);
     glutInitWindowPosition(100, 200); // Position the window's initial top-left corner
     /* create the window and store the handle to it */
-    wd = glutCreateWindow("Confettify!" /* title */ );
+    wd = glutCreateWindow("Checkers" /* title */ );
 
     // Register callback handler for window re-paint event
     glutDisplayFunc(display);
