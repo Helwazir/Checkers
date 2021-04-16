@@ -1,6 +1,6 @@
 //
 // Created by haz on 4/13/21.
-//
+
 
 #ifndef M4OEP_GRAPHIC_CHECKERS_H
 #define M4OEP_GRAPHIC_CHECKERS_H

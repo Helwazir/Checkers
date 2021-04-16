@@ -105,6 +105,8 @@ Move Checkers::getMove(Player player, ostream &outs, istream &ins) {
 }
 
 bool Checkers::validateMove(Player player, int rowStart, int colStart, int rowEnd, int colEnd) const {
+    cout << "Start coordinates: (" << rowStart << ", " << colStart << ")" << endl;
+    cout << "End coordinates: (" << rowEnd << ", " << colEnd << ")" << endl;
 
     int newRowEnd = (rowEnd * 2) - rowStart;
     int newColEnd = (colEnd * 2) - colStart;

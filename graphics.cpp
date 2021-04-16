@@ -11,6 +11,7 @@
 #include "circle.h"
 #include <iostream>
 #include <time.h>
+#include "G_Checkers.h"
 #include <memory>
 #include <vector>
 #include <optional>
@@ -26,6 +27,7 @@ Screen state = Start;
 Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
 Checkers checkers;
+G_Checkers G_check;
 GLdouble width, height, edgeLength;
 int x_0, y_0, x_1, y_1;
 bool clicked = false;
@@ -156,7 +158,7 @@ void cursor(int x, int y) {
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
 void mouse(int button, int state, int x, int y) {
-
+    board = checkers.getBoard();
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         int spaceXPos = ceil(x / 75);
         int spaceYPos = ceil(y / 75);
@@ -175,6 +177,9 @@ void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
         if (clicked == false) {
 //            checkers.movePiece(PLAYER1, y_0, x_0, y_1, x_1);
+            while (!checkers.validateMove(player, y_0, x_0, y_1, x_1)) {
+                cout << "Invalid move, please make a different move" << endl;
+            }
             if (checkers.validateMove(player, y_0, x_0, y_1, x_1)) {
                 checkers.movePiece(player, y_0, x_0, y_1, x_1);
 
