@@ -1,7 +1,3 @@
-//
-// Created by haz on 4/13/21.
-//
-
 #include "Piece.h"
 using std::string;
 

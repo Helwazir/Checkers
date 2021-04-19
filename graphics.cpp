@@ -19,48 +19,46 @@ using std::optional;
 using std::nullopt;
 using std::make_optional;
 using std::istream;
-
 using namespace std;
 
+
 enum Screen {RULES, PLAY, END};
-bool validMove;
+
+int wd;
+Rect user;
+bool secondClick = false;
 Screen screenState;
+Checkers checkers;
 Player player = PLAYER1;
 vector<vector<optional<Piece>>> board;
-//Checkers checkers;
-Checkers checkers;
+bool validMove;
 GLdouble width, height, edgeLength;
-int x_0, y_0, x_1, y_1;
-G_Move cMove;
-bool secondClick = false;
-Rect user;
-int wd;
+Move cMove;
 
-
-// TODO: Comment everything
-// TODO: Flip the board to display the current player's view
 
 void initUser() {
     // centered in the top left corner of the graphics window
     user = Rect(color(1, 0, 0), 0, 0, dimensions(20, 20));
 }
 
+
 void init() {
     screenState = RULES;
     validMove = true;
     checkers = Checkers();
-    checkers.createBoard();
     width = 600;
     height = 600;
     edgeLength = height / 8;
     srand(time(0));
 }
 
+
 /* Initialize OpenGL Graphics */
 void initGL() {
     // Set "clearing" or background color
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black and opaque
 }
+
 
 /* Handler for window-repaint event. Call back when the window first appears and
  whenever the window needs to be re-painted. */
@@ -77,11 +75,9 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);   // Clear the color buffer with current clearing color
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    /*
-     * Draw Here
-     */
 
-    if (screenState == RULES) {
+
+    if (screenState == RULES) {  // If the rules are being shown
         vector<string> rules = checkers.getRules();
         for (int i = 0; i < rules.size(); ++i) {
 
@@ -93,7 +89,6 @@ void display() {
             }
         }
     }
-
 
     if (screenState == PLAY) {
         // Draw Checkers Board
@@ -141,8 +136,7 @@ void display() {
             }
         }
 
-        if (validMove == false) {
-//            glColor3f(0.2, 0.2, 0.2);
+        if (validMove == false) {  // If the move is invalid notify the player with a message box
             Rect messageBox = Rect(dimensions(400, 38));
             messageBox.setColor(color(0.2, 0.2, 0.2));
             messageBox.setCenter(height/2, width / 2 - 4);
@@ -159,7 +153,7 @@ void display() {
 
     }
 
-    if (screenState == END) {
+    if (screenState == END) {  // Someone has won, display the results
         string results = checkers.getResults();
         glColor3f(1, 1, 1);
         glRasterPos2i((height / 2) - (4 * results.length()), width / 2);
@@ -171,6 +165,7 @@ void display() {
 
     glFlush();  // Render now
 }
+
 
 // http://www.theasciicode.com.ar/ascii-control-characters/escape-ascii-code-27.html
 void kbd(unsigned char key, int x, int y) {
@@ -186,25 +181,17 @@ void kbd(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
+
 void kbdS(int key, int x, int y) {
-    switch(key) {
-        case GLUT_KEY_DOWN:
-            break;
-        case GLUT_KEY_LEFT:
-            break;
-        case GLUT_KEY_RIGHT:
-            break;
-        case GLUT_KEY_UP:
-            break;
-    }
-    glutPostRedisplay();
 }
+
 
 void cursor(int x, int y) {
     user.setCenterX(x);
     user.setCenterY(y);
     glutPostRedisplay();
 }
+
 
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
@@ -214,41 +201,43 @@ void mouse(int button, int state, int x, int y) {
         int spaceXPos = ceil(y / 75); // Maybe change back to ceil?
         int spaceYPos = ceil(x / 75);
 
-        if (secondClick == false) {
+        if (secondClick == false) {  // First space clicked on
             cMove.x0 = spaceXPos;
             cMove.y0 = spaceYPos;
             secondClick = true;
-        } else {
+        } else {  // Second space clicked on
             cMove.x1 = spaceXPos;
             cMove.y1 = spaceYPos;
             secondClick = false;
         }
     }
 
+    // At the end of the second click
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP && !secondClick && screenState == PLAY) {
         if (!checkers.validateMove(player, cMove)) {
             validMove = false;
         } else {
             validMove = true;
             checkers.movePiece(cMove);
-            if (checkers.checkWin()) {
+            if (checkers.checkWin()) {  // Check if either player has won
                 screenState = END;
             }
-            if (player == PLAYER1) {
+            if (player == PLAYER1) {  // Change the current player
                 player = PLAYER2;
             } else {
                 player = PLAYER1;
             }
         }
     }
-
     glutPostRedisplay();
 }
+
 
 void timer(int dummy) {
     glutPostRedisplay();
     glutTimerFunc(30, timer, dummy);
 }
+
 
 /* Main function: GLUT runs as a console application starting at main()  */
 int main(int argc, char** argv) {
@@ -290,4 +279,3 @@ int main(int argc, char** argv) {
     glutMainLoop();
     return 0;
 }
-

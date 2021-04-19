@@ -1,10 +1,4 @@
-//
-// Created by haz on 4/16/21.
-//
-
-
 #include <algorithm>
-#include <iostream>
 #include "Checkers.h"
 using std::cout;
 using std::endl;
@@ -14,6 +8,7 @@ using std::pair;
 
 
 Checkers::Checkers() {
+    createBoard();
 }
 
 
@@ -66,7 +61,7 @@ vector<vector<optional<Piece>>> Checkers::getBoard() const {
 }
 
 
-bool Checkers::validateMove(Player player, G_Move move) const {
+bool Checkers::validateMove(Player player, Move move) const {
     int xJ, yJ;
     int x0 = move.x0;
     int y0 = move.y0;
@@ -75,7 +70,6 @@ bool Checkers::validateMove(Player player, G_Move move) const {
 
     // User clicked an empty space or an opposing player's piece
     if (!board[x0][y0] || board[x0][y0]->getPlayer() != player) {
-        cout << "User clicked an empty space or an opposing player's piece" << endl;
         return false;
     }
 
@@ -88,7 +82,6 @@ bool Checkers::validateMove(Player player, G_Move move) const {
     if (x0 == x1 || y0 == y1) {
         return false;
     }
-
 
     // There is already a piece on the ending space
     if (board[x1][y1]) {
@@ -113,11 +106,11 @@ bool Checkers::validateMove(Player player, G_Move move) const {
             return false;
         }
     }
-
     return true;
 }
 
-void Checkers::movePiece(G_Move move) {
+
+void Checkers::movePiece(Move move) {
     int xJ, yJ;
     int x0 = move.x0;
     int y0 = move.y0;
