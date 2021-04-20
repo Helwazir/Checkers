@@ -2,6 +2,8 @@
 Created by Hamzah Elwazir
 
 This builds on my M2OEP-Class-Relationships-helwazir project
+
+Video link: https://web.microsoftstream.com/video/5617c4a9-4d0b-4152-84cf-16e64f5c80f8
 # Checkers
 This is a simple graphical version of the two player game of Checkers. This version is made with the intention of 
 having two players take turns making moves. This version of the game does not support jumping over multiple pieces
