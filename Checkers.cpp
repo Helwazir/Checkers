@@ -74,7 +74,12 @@ bool Checkers::validateMove(Player player, Move move) const {
     }
 
     // If the move is too large, i.e. greater than two spaces
-    if (abs(x0 - x1) > 1 || abs(y0 - y1) > 1) {
+    if (abs(x0 - x1) > 2 || abs(y0 - y1) > 2) {
+        return false;
+    }
+
+    // If the move is not perfectly diagonal
+    if (abs(x0 - x1) != abs(y0 - y1) ) {
         return false;
     }
 
